@@ -6,7 +6,6 @@ namespace GPS
   using degrees = double;
   using radians = double;
   using metres  = double;
-  using seconds = unsigned long long int;
   using speed   = double;
 }
 
