@@ -680,9 +680,19 @@ BOOST_AUTO_TEST_CASE( LogWithInvalidFields )
     BOOST_CHECK_EQUAL( positions.size() , expectedSize );
 }
 
+std::fstream openNMEAlogFile(std::string filename)
+{
+    std::string logFilepath = LogFiles::NMEALogsDir + filename;
+    std::fstream log{logFilepath};
+    BOOST_REQUIRE_MESSAGE( log.good() ,
+      ("Could not open log file: " + logFilepath +
+       "\n(If you're running at the command-line, you need to 'cd' into the 'bin/' directory first.)") );
+    return log;
+}
+
 BOOST_AUTO_TEST_CASE( LargeLog_GLL )
 {
-    std::fstream log(LogFiles::NMEALogsDir + "gll.log");
+    std::fstream log = openNMEAlogFile("gll.log");
     const unsigned int expectedSize = 1090;
 
     // Pos 0: $GPGLL,5425.32,N,107.11,W,82319*65
@@ -705,8 +715,8 @@ BOOST_AUTO_TEST_CASE( LargeLog_GLL )
 }
 
 BOOST_AUTO_TEST_CASE( LargeLog_GGA_RMC )
-{
-    std::fstream log(LogFiles::NMEALogsDir + "gga_rmc-1.log");
+{   
+    std::fstream log = openNMEAlogFile("gga_rmc-1.log");
     const unsigned int expectedSize = 632; // The header and blank line should be discarded
 
     // Pos 0: $GPGGA,094627.000,3723.1622,N,00559.5788,W,1,0,,30.0,M,,M,,*7A
