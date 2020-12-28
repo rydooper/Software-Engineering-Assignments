@@ -10,6 +10,16 @@ namespace GPS
   const degrees poleLatitude = fullRotation/4;
   const degrees antiMeridianLongitude = fullRotation/2;
 
+  double pythagoras(double x, double y)
+  {
+      return std::sqrt(x*x + y*y);
+  }
+
+  double pythagoras(double x, double y, double z)
+  {
+      return std::sqrt(x*x + y*y + z*z);
+  }
+
   radians degToRad(degrees d)
   {
       return d * pi / halfRotation;
