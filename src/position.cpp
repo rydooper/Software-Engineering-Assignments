@@ -69,19 +69,6 @@ namespace GPS
       return ele;
   }
 
-  std::string Position::toString(bool includeElevation) const
-  {
-      std::ostringstream oss;
-
-      oss <<  "lat=\"" << lat << "\"";
-      oss << " lon=\"" << lon << "\"";
-      if (includeElevation) {
-          oss << " ele=\"" << ele << "\"";
-      }
-
-      return oss.str();
-  }
-
   metres Position::distanceBetween(Position p1, Position p2)
   /*
    * See: http://en.wikipedia.org/wiki/Law_of_haversines

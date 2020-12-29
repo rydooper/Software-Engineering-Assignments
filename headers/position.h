@@ -39,8 +39,6 @@ namespace GPS
       degrees longitude() const;
       metres  elevation() const;
 
-      std::string toString(bool includeElevation = true) const;
-
       /* Computes an approximation of the distance between two Positions on the Earth's surface.
        * Does not take into account elevation.
        */
