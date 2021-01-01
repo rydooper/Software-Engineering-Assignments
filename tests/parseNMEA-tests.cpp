@@ -468,6 +468,9 @@ BOOST_AUTO_TEST_CASE( MissingFieldsGLL )
 
     SentenceData missingLon = { "GLL", {"5425.31","N","E","82610"} };
     BOOST_CHECK_THROW( interpretSentenceData(missingLon) , std::invalid_argument );
+
+    SentenceData missingMany = { "GLL", {"N"} };
+    BOOST_CHECK_THROW( interpretSentenceData(missingMany) , std::invalid_argument );
 }
 
 BOOST_AUTO_TEST_CASE( MissingFieldsRMC )
@@ -483,6 +486,9 @@ BOOST_AUTO_TEST_CASE( MissingFieldsRMC )
 
     SentenceData missingLon = { "RMC", {"115856.000","A","3722.6710","S","E","0.000","0.00","150914","","A"} };
     BOOST_CHECK_THROW( interpretSentenceData(missingLon) , std::invalid_argument );
+
+    SentenceData missingMany = { "RMC", {"115856.000","A"} };
+    BOOST_CHECK_THROW( interpretSentenceData(missingMany) , std::invalid_argument );
 }
 
 BOOST_AUTO_TEST_CASE( MissingFieldsGGA )
@@ -495,6 +501,9 @@ BOOST_AUTO_TEST_CASE( MissingFieldsGGA )
 
     SentenceData missingM = { "GGA", {"170834","4124.8963","N","08151.6838","W","1","05","1.5","",""} };
     BOOST_CHECK_THROW( interpretSentenceData(missingM) , std::invalid_argument );
+
+    SentenceData missingMany = { "GGA", {"170834","N","W"} };
+    BOOST_CHECK_THROW( interpretSentenceData(missingMany) , std::invalid_argument );
 }
 
 BOOST_AUTO_TEST_CASE( InvalidFieldData )
