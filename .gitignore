@@ -1,3 +1,2 @@
-bin/parseNMEA-tests
+bin/*
 *.pro.user
-*.o
