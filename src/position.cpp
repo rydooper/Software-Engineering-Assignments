@@ -69,7 +69,7 @@ namespace GPS
       return ele;
   }
 
-  metres Position::distanceBetween(Position p1, Position p2)
+  metres Position::horizontalDistanceBetween(Position p1, Position p2)
   /*
    * See: http://en.wikipedia.org/wiki/Law_of_haversines
    */

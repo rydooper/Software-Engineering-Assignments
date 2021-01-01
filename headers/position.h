@@ -39,10 +39,10 @@ namespace GPS
       degrees longitude() const;
       metres  elevation() const;
 
-      /* Computes an approximation of the distance between two Positions on the Earth's surface.
-       * Does not take into account elevation.
+      /* Computes an approximation of the horizontal distance between two Positions
+       * on the Earth's surface. Does not take into account elevation.
        */
-      static metres distanceBetween(Position, Position);
+      static metres horizontalDistanceBetween(Position, Position);
 
     private:
       degrees lat;
