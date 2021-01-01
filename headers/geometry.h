@@ -11,6 +11,12 @@ namespace GPS
   extern const degrees poleLatitude;
   extern const degrees antiMeridianLongitude;
 
+  // Compute hypotenuse of right-angled triangle in two dimensions.
+  double pythagoras(double,double);
+
+  // Compute hypotenuse of right-angled triangle in three dimensions.
+  double pythagoras(double,double,double);
+
   // Convert from degrees to radians.
   radians degToRad(degrees);
 
