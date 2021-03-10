@@ -9,6 +9,7 @@ HEADERS += \
     headers/earth.h \
     headers/geometry.h \
     headers/logs.h \
+    headers/pointer.h \
     headers/parseGPX.h \
     headers/position.h \
     headers/types.h \

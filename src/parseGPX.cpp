@@ -13,11 +13,12 @@ namespace GPX
       using namespace std;
       using namespace GPS;
       using namespace XML;
-      int num,i,j,total,skipped;
-      metres deltaH,deltaV;
+      int num=0,firstCharNotSpace,lastCharNotSpace,totalSubElements,skipped=0;
       string lat,lon,el,name;
       ostringstream oss,oss2;
       std::vector<RoutePoint> result;
+      //test comment
+
       Element ele = SelfClosingElement("",{}), temp = ele, temp2 = ele; // Work-around because there's no public constructor in Element.
       Position startPos(0,0), prevPos = startPos, nextPos = startPos; // Same thing but for Position.
       if (isFileName) {
@@ -44,9 +45,9 @@ namespace GPX
           oss << "Route name is: " << routeName << endl;
       }
       */
-      num = 0;
+
       if (! ele.containsSubElement("rtept")) throw domain_error("Missing 'rtept' element.");
-      total = ele.countSubElements("rtept");
+      totalSubElements = ele.countSubElements("rtept");
       temp = ele.getSubElement("rtept");
       if (! temp.containsAttribute("lat")) throw domain_error("Missing 'lat' attribute.");
       if (! temp.containsAttribute("lon")) throw domain_error("Missing 'lon' attribute.");
@@ -68,14 +69,13 @@ namespace GPX
       if (temp.containsSubElement("name")) {
           temp2 = temp.getSubElement("name");
           name = temp2.getLeafContent();
-          i = name.find_first_not_of(' ');
-          j = name.find_last_not_of(' ');
-          name = (i == -1) ? "" : name.substr(i,j-i+1);
+          firstCharNotSpace = name.find_first_not_of(' ');
+          lastCharNotSpace = name.find_last_not_of(' ');
+          name = (firstCharNotSpace == -1) ? "" : name.substr(firstCharNotSpace,lastCharNotSpace-firstCharNotSpace+1);
       } else name = ""; // Fixed bug by adding this.
       result.front().name = name;
       prevPos = result.back().position, nextPos = result.back().position;
-      skipped = 0;
-      while (num+skipped < total) {
+      while (num+skipped < totalSubElements) {
           temp = ele.getSubElement("rtept",num+skipped);
           if (! temp.containsAttribute("lat")) throw domain_error("Missing 'lat' attribute.");
           if (! temp.containsAttribute("lon")) throw domain_error("Missing 'lon' attribute.");
@@ -97,8 +97,8 @@ namespace GPX
               if (temp.containsSubElement("name")) {
                   temp2 = temp.getSubElement("name");
                   name = temp2.getLeafContent();
-                  i = name.find_first_not_of(' ');
-                  j = name.find_last_not_of(' ');
+                  firstCharNotSpace = name.find_first_not_of(' ');
+                  lastCharNotSpace = name.find_last_not_of(' ');
                   // if (i == string::npos)
                   // {
                   //    name = "";
@@ -109,7 +109,7 @@ namespace GPX
                   //   j = name.find_last_not_of(' ');
                   //   name.erase(j+1);
                   // }
-                  name = (i == -1) ? "" : name.substr(i,j-i+1); // So much shorter than Ken's version :)
+                  name = (firstCharNotSpace == -1) ? "" : name.substr(firstCharNotSpace,lastCharNotSpace-firstCharNotSpace+1); // So much shorter than Ken's version :)
               } else name = ""; // Fixed bug by adding this.
               result.push_back({nextPos,name});
               oss << "Position added: " << endl; // << nextPos.toString() << endl; // Need to update since removing toString()
