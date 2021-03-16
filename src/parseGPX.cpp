@@ -1,36 +1,62 @@
 #include <sstream>
 #include <fstream>
 #include <iomanip>
-
+#include <iostream>
 #include "xml/parser.h"
-
 #include "parseGPX.h"
+using namespace std;
+using namespace GPS;
+using namespace XML;
 
 namespace GPX
 {
+/*void ContainsAttribute(Element element) {
+    if (! element.containsAttribute("lat")) {
+        throw domain_error("Missing 'lat' attribute.");
+    }
+    if (! element.containsAttribute("lon")) {
+        throw domain_error("Missing 'lon' attribute.");
+    }
+}*/
+
 std::vector<GPS::RoutePoint> parseRoute(std::string source, bool isFileName)
 {
-    using namespace std;
-    using namespace GPS;
-    using namespace XML;
+    //using namespace std;
     int num=0, firstCharNotSpace, lastCharNotSpace, totalSubElements, skipped=0;
     string latitude, longitude, elevation, name, line;
-    ostringstream positionsStream, oss2;
+    ostringstream positionsStream, oss;
     std::vector<RoutePoint> result;
 
     Element element = SelfClosingElement("",{}), element1 = element, temp2 = element; // Work-around because there's no public constructor in Element.
     Position startPos(0,0), prevPos = startPos, nextPos = startPos; // Same thing but for Position.
+    try {
     if (isFileName) {
         ifstream fs(source);
-        if (! fs.good()) {
+        /*if (fs.good()) {
+            positionsStream << "Source file '" << source << "' opened okay." << endl;
+            while (fs.good()) {
+                getline(fs, line);
+                oss << line << endl;
+            }
+            source = oss.str();
+        } else {
+            throw invalid_argument("Error opening source file '" + source + "'.");
+        }*/
+        //positionsStream << "Source file '" << source << "' opened okay." << endl;
+        /*while (fs.good()){
+            getline(fs, line);
+            oss << line << endl;
+        }
+        source = oss.str();*/
+        if (fs.good()) {
+            while (fs.good()) {
+                getline(fs, line);
+                oss << line << endl;
+            }
+            source = oss.str();
+        } else {
             throw invalid_argument("Error opening source file '" + source + "'.");
         }
-        positionsStream << "Source file '" << source << "' opened okay." << endl;
-        while (fs.good()) {
-            getline(fs, line);
-            oss2 << line << endl;
-        }
-        source = oss2.str();
     }
     element = Parser(source).parseRootElement();
     if (element.getName() != "gpx") {
@@ -47,6 +73,7 @@ std::vector<GPS::RoutePoint> parseRoute(std::string source, bool isFileName)
     totalSubElements = element.countSubElements("rtept");
     element1 = element.getSubElement("rtept");
 
+    //ContainsAttribute(element1);
     if (! element1.containsAttribute("lat")) {
         throw domain_error("Missing 'lat' attribute.");
     }
@@ -82,6 +109,7 @@ std::vector<GPS::RoutePoint> parseRoute(std::string source, bool isFileName)
     prevPos = result.back().position, nextPos = result.back().position;
     while (num+skipped < totalSubElements) {
         element1 = element.getSubElement("rtept",num+skipped);
+        //ContainsAttribute(element1);
         if (! element1.containsAttribute("lat")) {
             throw domain_error("Missing 'lat' attribute.");
         }
@@ -112,16 +140,14 @@ std::vector<GPS::RoutePoint> parseRoute(std::string source, bool isFileName)
         prevPos = nextPos;
     }
     positionsStream << num << " positions added." << endl;
+    } catch (std::string error) {
+        throw std::domain_error(error);
+    }
     return result;
 }
-
-  std::vector<GPS::TrackPoint> parseTrack(std::string source, bool isFileName)
-  {
-      using namespace std;
-      using namespace GPS;
-      using namespace XML;
+  std::vector<GPS::TrackPoint> parseTrack(std::string source, bool isFileName) {
       int num,i,j,total,skipped;
-      metres deltaH,deltaV;
+      //metres deltaH,deltaV;
       string lat,lon,el,name,time;
       tm t;
       ostringstream oss,oss2;
@@ -158,8 +184,13 @@ std::vector<GPS::RoutePoint> parseRoute(std::string source, bool isFileName)
           if (! ele.containsSubElement("trkpt")) throw domain_error("Missing 'trkpt' element.");
           total = ele.countSubElements("trkpt");
           temp = ele.getSubElement("trkpt");
-          if (! temp.containsAttribute("lat")) throw domain_error("Missing 'lat' attribute.");
-          if (! temp.containsAttribute("lon")) throw domain_error("Missing 'lon' attribute.");
+          //ContainsAttribute(temp);
+          if (! temp.containsAttribute("lat")) {
+              throw domain_error("Missing 'lat' attribute.");
+          }
+          if (! temp.containsAttribute("lon")) {
+              throw domain_error("Missing 'lon' attribute.");
+          }
           lat = temp.getAttribute("lat");
           lon = temp.getAttribute("lon");
           if (temp.containsSubElement("ele")) {
