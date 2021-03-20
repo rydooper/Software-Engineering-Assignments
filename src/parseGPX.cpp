@@ -10,120 +10,83 @@ using namespace XML;
 
 namespace GPX
 {
-/*void ContainsAttribute(Element element) {
+void ContainsAttribute(Element element) {
     if (! element.containsAttribute("lat")) {
         throw domain_error("Missing 'lat' attribute.");
     }
     if (! element.containsAttribute("lon")) {
         throw domain_error("Missing 'lon' attribute.");
     }
-}*/
+}
 
-std::vector<GPS::RoutePoint> parseRoute(std::string source, bool isFileName)
-{
+//magic literals = changing for loops from numbers to named variables
+std::vector<GPS::RoutePoint> parseRoute(std::string source, bool isFileName) {
     //using namespace std;
     int num=0, firstCharNotSpace, lastCharNotSpace, totalSubElements, skipped=0;
-    string latitude, longitude, elevation, name, line;
-    ostringstream positionsStream, oss;
-    std::vector<RoutePoint> result;
+    string latitude, longitude, elevation, name, line; //line = LineFromFile
+    ostringstream positionsStream, fileReadStream; //oss = fileReadStream
+    std::vector<RoutePoint> result; //parse = ParsedResult
 
-    Element element = SelfClosingElement("",{}), element1 = element, temp2 = element; // Work-around because there's no public constructor in Element.
+    Element element = SelfClosingElement("",{}), element1 = element, temp2 = element; // Work-around because there's no public constructor in Element. -> change the element1 and temp2 names
     Position startPos(0,0), prevPos = startPos, nextPos = startPos; // Same thing but for Position.
     try {
-    if (isFileName) {
-        ifstream fs(source);
-        /*if (fs.good()) {
-            positionsStream << "Source file '" << source << "' opened okay." << endl;
+        if (isFileName == true) { //checks if the file is a file name
+            ifstream fs(source);
+            if (!fs.good()) {
+                throw invalid_argument("Error opening source file '" + source + "'.");
+            }
             while (fs.good()) {
                 getline(fs, line);
-                oss << line << endl;
+                fileReadStream << line << endl;
             }
-            source = oss.str();
-        } else {
-            throw invalid_argument("Error opening source file '" + source + "'.");
-        }*/
-        //positionsStream << "Source file '" << source << "' opened okay." << endl;
-        /*while (fs.good()){
-            getline(fs, line);
-            oss << line << endl;
+            source = fileReadStream.str();
+            /*if (fs.good()) { //possibly remove the if statement, as the while loop checks the condition at the beginning too
+                while (fs.good()) {
+                    getline(fs, line);
+                    oss << line << endl;
+                }
+                source = oss.str();
+            } else { //this else (if the if statement is removed) could become a shorted if statement
+                throw invalid_argument("Error opening source file '" + source + "'.");
+            }*/
         }
-        source = oss.str();*/
-        if (fs.good()) {
-            while (fs.good()) {
-                getline(fs, line);
-                oss << line << endl;
-            }
-            source = oss.str();
-        } else {
-            throw invalid_argument("Error opening source file '" + source + "'.");
+        element = Parser(source).parseRootElement();
+        if (element.getName() != "gpx") {
+            throw domain_error("Missing 'gpx' element.");
         }
-    }
-    element = Parser(source).parseRootElement();
-    if (element.getName() != "gpx") {
-        throw domain_error("Missing 'gpx' element.");
-    }
-    if (! element.containsSubElement("rte")) {
-        throw domain_error("Missing 'rte' element.");
-    }
-    element = element.getSubElement("rte");
+        if (! element.containsSubElement("rte")) {
+            throw domain_error("Missing 'rte' element.");
+        }
+        element = element.getSubElement("rte");
 
-    if (! element.containsSubElement("rtept")) {
-        throw domain_error("Missing 'rtept' element.");
-    }
-    totalSubElements = element.countSubElements("rtept");
-    element1 = element.getSubElement("rtept");
+        if (! element.containsSubElement("rtept")) {
+            throw domain_error("Missing 'rtept' element.");
+        }
+        totalSubElements = element.countSubElements("rtept");
+        element1 = element.getSubElement("rtept");
 
-    //ContainsAttribute(element1);
-    if (! element1.containsAttribute("lat")) {
-        throw domain_error("Missing 'lat' attribute.");
-    }
-    if (! element1.containsAttribute("lon")) {
-        throw domain_error("Missing 'lon' attribute.");
-    }
-    latitude = element1.getAttribute("lat");
-    longitude = element1.getAttribute("lon");
-
-    if (element1.containsSubElement("ele")) {
-        temp2 = element1.getSubElement("ele");
-        elevation = temp2.getLeafContent();
-        Position startPos = Position(latitude,longitude,elevation);
-        result.push_back({startPos,""});
-        positionsStream << "Position added: " << endl;
-        ++num;
-    } else {
-        Position startPos = Position(latitude,longitude);
-        result.push_back({startPos,""});
-        positionsStream << "Position added: " << endl;
-        ++num;
-    }
-    if (element1.containsSubElement("name")) {
-        temp2 = element1.getSubElement("name");
-        name = temp2.getLeafContent();
-        firstCharNotSpace = name.find_first_not_of(' ');
-        lastCharNotSpace = name.find_last_not_of(' ');
-        name = (firstCharNotSpace == -1) ? "" : name.substr(firstCharNotSpace,lastCharNotSpace-firstCharNotSpace+1);
-    } else {
-        name = ""; // Fixed bug by adding this.
-    }
-    result.front().name = name;
-    prevPos = result.back().position, nextPos = result.back().position;
-    while (num+skipped < totalSubElements) {
-        element1 = element.getSubElement("rtept",num+skipped);
-        //ContainsAttribute(element1);
-        if (! element1.containsAttribute("lat")) {
+        ContainsAttribute(element1);
+        /*if (! element1.containsAttribute("lat")) {
             throw domain_error("Missing 'lat' attribute.");
         }
         if (! element1.containsAttribute("lon")) {
             throw domain_error("Missing 'lon' attribute.");
-        }
+        }*/
         latitude = element1.getAttribute("lat");
         longitude = element1.getAttribute("lon");
+
         if (element1.containsSubElement("ele")) {
             temp2 = element1.getSubElement("ele");
             elevation = temp2.getLeafContent();
-            nextPos = Position(latitude,longitude,elevation);
+            Position startPos = Position(latitude,longitude,elevation);
+            result.push_back({startPos,""});
+            positionsStream << "Position added: " << endl;
+            ++num;
         } else {
-            nextPos = Position(latitude,longitude);
+            Position startPos = Position(latitude,longitude);
+            result.push_back({startPos,""});
+            positionsStream << "Position added: " << endl;
+            ++num;
         }
         if (element1.containsSubElement("name")) {
             temp2 = element1.getSubElement("name");
@@ -134,17 +97,47 @@ std::vector<GPS::RoutePoint> parseRoute(std::string source, bool isFileName)
         } else {
             name = ""; // Fixed bug by adding this.
         }
-        result.push_back({nextPos,name});
-        positionsStream << "Position added: " << endl;
-        ++num;
-        prevPos = nextPos;
+        result.front().name = name;
+        prevPos = result.back().position, nextPos = result.back().position;
+        //const int SkippedNums = num+skipped;
+        while (num+skipped < totalSubElements) { //while loop could be converted to for loop (int element = num+skipped; element < totalSubElements; element++) -> num+skipped into a const variable
+            element1 = element.getSubElement("rtept",num+skipped);
+            ContainsAttribute(element1);
+            /*if (! element1.containsAttribute("lat")) {
+                throw domain_error("Missing 'lat' attribute.");
+            }
+            if (! element1.containsAttribute("lon")) {
+                throw domain_error("Missing 'lon' attribute.");
+            }*/
+            latitude = element1.getAttribute("lat");
+            longitude = element1.getAttribute("lon");
+            if (element1.containsSubElement("ele")) {
+                temp2 = element1.getSubElement("ele");
+                elevation = temp2.getLeafContent();
+                nextPos = Position(latitude,longitude,elevation);
+            } else {
+                nextPos = Position(latitude,longitude);
+            }
+            if (element1.containsSubElement("name")) {
+                temp2 = element1.getSubElement("name");
+                name = temp2.getLeafContent();
+                firstCharNotSpace = name.find_first_not_of(' ');
+                lastCharNotSpace = name.find_last_not_of(' ');
+                name = (firstCharNotSpace == -1) ? "" : name.substr(firstCharNotSpace,lastCharNotSpace-firstCharNotSpace+1);
+            } else {
+                name = ""; // Fixed bug by adding this.
+            }
+            result.push_back({nextPos,name});
+            positionsStream << "Position added: " << endl;
+            ++num; //element++
+            prevPos = nextPos;
+        }
+        positionsStream << num << " positions added." << endl;
+        } catch (std::string error) {
+            throw std::domain_error(error);
+        }
+        return result;
     }
-    positionsStream << num << " positions added." << endl;
-    } catch (std::string error) {
-        throw std::domain_error(error);
-    }
-    return result;
-}
   std::vector<GPS::TrackPoint> parseTrack(std::string source, bool isFileName) {
       int num,i,j,total,skipped;
       //metres deltaH,deltaV;
