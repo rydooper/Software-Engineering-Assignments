@@ -120,231 +120,246 @@ std::vector<GPS::RoutePoint> parseRoute(std::string source, bool isFileName) {
     return parsedResult;
 }
 std::vector<GPS::TrackPoint> parseTrack(std::string source, bool isFileName) {
-    int num=0,firstCharNotSpace,lastCharNotSpace,total,skipped;
-    string lat,lon,el,name,time;
-    tm t;
-    ostringstream oss,oss2;
-    istringstream iss;
-    std::vector<TrackPoint> result;
-    Element ele = SelfClosingElement("",{}), temp = ele, temp2 = ele, ele2 = ele; // Work-around because there's no public constructor in Element.
+    int num=0, firstCharNotSpace, lastCharNotSpace, total, skipped=0;
+    string latitude, longitude, elevation, name, time, lineFromFile;
+    const string trksegString = "trkseg";
+    const string trkString = "trk";
+    const string trkptString = "trkpt";
+
+    tm timeStruct;  //struct for time
+    ostringstream positionStream, fileReadStream;
+    istringstream timeStream;
+    std::vector<TrackPoint> parsedResult;
+
+    Element element = SelfClosingElement("",{}), element1 = element, element2 = element, element3 = element; // Work-around because there's no public constructor in Element.
     Position startPos(0,0), prevPos = startPos, nextPos = startPos; // Same thing but for Position.
-    if (isFileName) {
-        ifstream fs(source);
-        if (! fs.good()) {
-            throw invalid_argument("Error opening source file '" + source + "'.");
-        }
-        oss << "Source file '" << source << "' opened okay." << endl;
-        while (fs.good()) {
-            getline(fs, name); // Using name as temporary variable as we don't need it until later
-            oss2 << name << endl;
-        }
-        source = oss2.str();
-    }
-
-    ele = Parser(source).parseRootElement();
-    if (ele.getName() != "gpx") {
-        throw domain_error("Missing 'gpx' element.");
-    }
-    if (! ele.containsSubElement("trk")) {
-        throw domain_error("Missing 'trk' element.");
-    }
-
-    ele = ele.getSubElement("trk");
-    if (! ele.containsSubElement("trkseg")) {
-        if (! ele.containsSubElement("trkpt")) {
-            throw domain_error("Missing 'trkpt' element.");
-        }
-        total = ele.countSubElements("trkpt");
-        temp = ele.getSubElement("trkpt");
-        //ContainsAttribute(temp);
-        if (! temp.containsAttribute("lat")) {
-            throw domain_error("Missing 'lat' attribute.");
-        }
-        if (! temp.containsAttribute("lon")) {
-            throw domain_error("Missing 'lon' attribute.");
-        }
-        lat = temp.getAttribute("lat");
-        lon = temp.getAttribute("lon");
-        if (temp.containsSubElement("ele")) {
-            temp2 = temp.getSubElement("ele");
-            el = temp2.getLeafContent();
-            startPos = Position(lat,lon,el);
-            result.push_back({startPos,name,t});
-            oss << "Position added: " << endl; // << startPos.toString() << endl; // Need to update since removing toString()
-            ++num;
-        } else {
-            startPos = Position(lat,lon);
-            result.push_back({startPos,name,t});
-            oss << "Position added: " << endl; // << startPos.toString() << endl; // Need to update since removing toString()
-            ++num;
-        }
-        if (temp.containsSubElement("name")) {
-            temp2 = temp.getSubElement("name");
-            name = temp2.getLeafContent();
-            firstCharNotSpace = name.find_first_not_of(' ');
-            lastCharNotSpace = name.find_last_not_of(' ');
-            name = (firstCharNotSpace == -1) ? "" : name.substr(firstCharNotSpace,lastCharNotSpace-firstCharNotSpace+1);
-        } else {
-            name = ""; // Fixed bug by adding this.
-        }
-        result.back().name = name;
-        if (! temp.containsSubElement("time")) {
-            throw domain_error("Missing 'time' element.");
-        }
-        temp2 = temp.getSubElement("time");
-        time = temp2.getLeafContent();
-        iss.str(time);
-        iss >> std::get_time(&t,"%Y-%m-%dT%H:%M:%SZ");
-        if (iss.fail()) {
-            throw std::domain_error("Malformed date/time content: " + time);
-        }
-        result.back().dateTime = t;
-        prevPos = result.back().position, nextPos = result.back().position;
-        skipped = 0;
-
-        while (num+skipped < total) {
-            temp = ele.getSubElement("trkpt",num+skipped);
-            if (! temp.containsAttribute("lat")) {
-                throw domain_error("Missing 'lat' attribute.");
+    try {
+        if (isFileName == true) {
+            ifstream fs(source);
+            if (! fs.good()) {
+                throw invalid_argument("Error opening source file '" + source + "'.");
             }
-            if (! temp.containsAttribute("lon")) {
-                throw domain_error("Missing 'lon' attribute.");
+            positionStream << "Source file '" << source << "' opened okay." << endl;
+
+            while (! fs.eof()) {
+                getline(fs, lineFromFile);
+                fileReadStream << lineFromFile << endl;
             }
-            lat = temp.getAttribute("lat");
-            lon = temp.getAttribute("lon");
-            if (temp.containsSubElement("ele")) {
-                temp2 = temp.getSubElement("ele");
-                el = temp2.getLeafContent();
-                nextPos = Position(lat,lon,el);
+            source = fileReadStream.str();
+        }
+
+        element = Parser(source).parseRootElement();
+        if (element.getName() != "gpx") {
+            throw domain_error("Missing 'gpx' element.");
+        }
+        if (! element.containsSubElement(trkString)) {
+            throw domain_error("Missing 'trk' element.");
+        }
+
+        element = element.getSubElement(trkString);
+        if (! element.containsSubElement(trksegString)) {
+            if (! element.containsSubElement(trkptString)) {
+                throw domain_error("Missing 'trkpt' element.");
+            }
+            total = element.countSubElements(trkptString);
+            element1 = element.getSubElement(trkptString);
+            ContainsAttribute(element1);
+
+            latitude = element1.getAttribute("lat");
+            longitude = element1.getAttribute("lon");
+            if (element1.containsSubElement("ele")) {
+                element2 = element1.getSubElement("ele");
+                elevation = element2.getLeafContent();
+
+                startPos = Position(latitude,longitude,elevation);
+                parsedResult.push_back({startPos,name,timeStruct});
+                positionStream << "Position added: " << endl;
+                ++num;
             } else {
-                nextPos = Position(lat,lon);
+                startPos = Position(latitude,longitude);
+                parsedResult.push_back({startPos,name,timeStruct});
+                positionStream << "Position added: " << endl;
+                ++num;
             }
-            if (! temp.containsSubElement("time")) {
-                throw domain_error("Missing 'time' element.");
-            }
-            temp2 = temp.getSubElement("time");
-            time = temp2.getLeafContent();
-            iss.str(time);
-            iss >> std::get_time(&t,"%Y-%m-%dT%H:%M:%SZ");
-            if (iss.fail()) {
-                throw std::domain_error("Malformed date/time content: " + time);
-            }
-            if (temp.containsSubElement("name")) {
-                temp2 = temp.getSubElement("name");
-                name = temp2.getLeafContent();
+            if (element1.containsSubElement("name")) {
+                element2 = element1.getSubElement("name");
+                name = element2.getLeafContent();
+
                 firstCharNotSpace = name.find_first_not_of(' ');
                 lastCharNotSpace = name.find_last_not_of(' ');
                 name = (firstCharNotSpace == -1) ? "" : name.substr(firstCharNotSpace,lastCharNotSpace-firstCharNotSpace+1);
             } else {
                 name = ""; // Fixed bug by adding this.
             }
-            result.push_back({nextPos,name,t});
-            oss << "Position added: " << endl; // << nextPos.toString() << endl; // Need to update since removing toString()
-            oss << " at time: " << std::put_time(&t,"%c") << endl;
-            ++num;
-            prevPos = nextPos;
-        }
-    }
-    else {
-        for (unsigned int segNum = 0; segNum < ele.countSubElements("trkseg"); ++segNum) {
-            ele2 = ele.getSubElement("trkseg",segNum);
-            if (! ele2.containsSubElement("trkpt")) {
-                throw domain_error("Missing 'trkpt' element.");
+
+            parsedResult.back().name = name;
+            if (! element1.containsSubElement("time")) {
+                throw domain_error("Missing 'time' element.");
             }
-            total = ele2.countSubElements("trkpt");
-            skipped = -num; // Setting skipped to start at -num (rather than 0) cancels any points accumulated from previous segments
-            // We have to set it here, rather than just before the loop, because num may increment in the next if-statement
-            if (segNum == 0) {
-                temp = ele2.getSubElement("trkpt");
-                if (! temp.containsAttribute("lat")) {
-                    throw domain_error("Missing 'lat' attribute.");
-                }
-                if (! temp.containsAttribute("lon")) {
-                    throw domain_error("Missing 'lon' attribute.");
-                }
-                lat = temp.getAttribute("lat");
-                lon = temp.getAttribute("lon");
-                if (temp.containsSubElement("ele")) {
-                    temp2 = temp.getSubElement("ele");
-                    el = temp2.getLeafContent();
-                    startPos = Position(lat,lon,el);
-                    result.push_back({startPos,name,t});
-                    oss << "Position added: " << endl; // << startPos.toString() << endl; // Need to update since removing toString()
-                    ++num;
-                }
-                else {
-                    startPos = Position(lat,lon);
-                    result.push_back({startPos,name,t});
-                    oss << "Position added: " << endl; // << startPos.toString() << endl; // Need to update since removing toString()
-                    ++num;
-                }
-                if (temp.containsSubElement("name")) {
-                    temp2 = temp.getSubElement("name");
-                    name = temp2.getLeafContent();
-                    firstCharNotSpace = name.find_first_not_of(' ');
-                    lastCharNotSpace = name.find_last_not_of(' ');
-                    name = (firstCharNotSpace == -1) ? "" : name.substr(firstCharNotSpace,lastCharNotSpace-firstCharNotSpace+1);
+            element2 = element1.getSubElement("time");
+            time = element2.getLeafContent();
+
+            timeStream.str(time);
+            timeStream >> std::get_time(&timeStruct,"%Y-%m-%dT%H:%M:%SZ");
+            if (timeStream.fail()) {
+                throw std::domain_error("Malformed date/time content: " + time);
+            }
+
+            parsedResult.back().dateTime = timeStruct;
+            prevPos = parsedResult.back().position, nextPos = parsedResult.back().position;
+
+            while (num+skipped < total) {
+                element1 = element.getSubElement(trkptString,num+skipped);
+                ContainsAttribute(element1);
+
+                latitude = element1.getAttribute("lat");
+                longitude = element1.getAttribute("lon");
+                if (element1.containsSubElement("ele")) {
+                    element2 = element1.getSubElement("ele");
+                    elevation = element2.getLeafContent();
+
+                    nextPos = Position(latitude,longitude,elevation);
                 } else {
-                    name = ""; // Fixed bug by adding this.
+                    nextPos = Position(latitude,longitude);
                 }
-                result.back().name = name;
-                if (! temp.containsSubElement("time")) {
+                if (! element1.containsSubElement("time")) {
                     throw domain_error("Missing 'time' element.");
                 }
-                temp2 = temp.getSubElement("time");
-                time = temp2.getLeafContent();
-                iss.str(time);
-                iss >> std::get_time(&t,"%Y-%m-%dT%H:%M:%SZ");
-                if (iss.fail()) {
+                element2 = element1.getSubElement("time");
+                time = element2.getLeafContent();
+
+                timeStream.str(time);
+                timeStream >> std::get_time(&timeStruct,"%Y-%m-%dT%H:%M:%SZ");
+                if (timeStream.fail()) {
                     throw std::domain_error("Malformed date/time content: " + time);
                 }
-                result.back().dateTime = t;
-            }
-            prevPos = result.back().position, nextPos = result.back().position;
-            while (num+skipped < total) {
-                temp = ele2.getSubElement("trkpt",num+skipped);
-                if (! temp.containsAttribute("lat")) {
-                    throw domain_error("Missing 'lat' attribute.");
-                }
-                if (! temp.containsAttribute("lon")) {
-                    throw domain_error("Missing 'lon' attribute.");
-                }
-                lat = temp.getAttribute("lat");
-                lon = temp.getAttribute("lon");
-                if (temp.containsSubElement("ele")) {
-                    temp2 = temp.getSubElement("ele");
-                    el = temp2.getLeafContent();
-                    nextPos = Position(lat,lon,el);
-                } else {
-                    nextPos = Position(lat,lon);
-                }
+                if (element1.containsSubElement("name")) {
+                    element2 = element1.getSubElement("name");
+                    name = element2.getLeafContent();
 
-                if (! temp.containsSubElement("time")) {
-                    throw domain_error("Missing 'time' element.");
-                }
-                temp2 = temp.getSubElement("time");
-                time = temp2.getLeafContent();
-                iss.str(time);
-                iss >> std::get_time(&t,"%Y-%m-%dT%H:%M:%SZ");
-                if (iss.fail()) throw std::domain_error("Malformed date/time content: " + time);
-                if (temp.containsSubElement("name")) {
-                    temp2 = temp.getSubElement("name");
-                    name = temp2.getLeafContent();
                     firstCharNotSpace = name.find_first_not_of(' ');
                     lastCharNotSpace = name.find_last_not_of(' ');
                     name = (firstCharNotSpace == -1) ? "" : name.substr(firstCharNotSpace,lastCharNotSpace-firstCharNotSpace+1);
                 } else {
                     name = ""; // Fixed bug by adding this.
                 }
-                result.push_back({nextPos,name,t});
-                oss << "Position added: " << endl; // << nextPos.toString() << endl; // Need to update since removing toString()
-                oss << " at time: " << std::put_time(&t,"%c") << endl;
+
+                parsedResult.push_back({nextPos,name,timeStruct});
+
+                positionStream << "Position added: " << endl;
+                positionStream << " at time: " << std::put_time(&timeStruct,"%c") << endl;
                 ++num;
                 prevPos = nextPos;
             }
+        } else {
+            unsigned int segmentNum;
+
+            for (segmentNum=0; segmentNum < element.countSubElements(trksegString); ++segmentNum) {
+                element3 = element.getSubElement(trksegString, segmentNum);
+                if (! element3.containsSubElement(trkptString)) {
+                    throw domain_error("Missing 'trkpt' element.");
+                }
+
+                total = element3.countSubElements(trkptString);
+                skipped = -num; // Setting skipped to start at -num (rather than 0) cancels any points accumulated from previous segments
+                // We have to set it here, rather than just before the loop, because num may increment in the next if-statement
+                if (segmentNum == 0) {
+                    element1 = element3.getSubElement(trkptString);
+                    ContainsAttribute(element1);
+
+                    latitude = element1.getAttribute("lat");
+                    longitude = element1.getAttribute("lon");
+                    if (element1.containsSubElement("ele")) {
+                        element2 = element1.getSubElement("ele");
+                        elevation = element2.getLeafContent();
+
+                        startPos = Position(latitude,longitude,elevation);
+                        parsedResult.push_back({startPos,name,timeStruct});
+                        positionStream << "Position added: " << endl;
+                        ++num;
+                    }
+                    else {
+                        startPos = Position(latitude,longitude);
+                        parsedResult.push_back({startPos,name,timeStruct});
+                        positionStream << "Position added: " << endl;
+                        ++num;
+                    }
+                    if (element1.containsSubElement("name")) {
+                        element2 = element1.getSubElement("name");
+                        name = element2.getLeafContent();
+
+                        firstCharNotSpace = name.find_first_not_of(' ');
+                        lastCharNotSpace = name.find_last_not_of(' ');
+                        name = (firstCharNotSpace == -1) ? "" : name.substr(firstCharNotSpace,lastCharNotSpace-firstCharNotSpace+1);
+                    } else {
+                        name = ""; // Fixed bug by adding this.
+                    }
+
+                    parsedResult.back().name = name;
+                    if (! element1.containsSubElement("time")) {
+                        throw domain_error("Missing 'time' element.");
+                    }
+
+                    element2 = element1.getSubElement("time");
+                    time = element2.getLeafContent();
+
+                    timeStream.str(time);
+                    timeStream >> std::get_time(&timeStruct,"%Y-%m-%dT%H:%M:%SZ");
+                    if (timeStream.fail()) {
+                        throw std::domain_error("Malformed date/time content: " + time);
+                    }
+                    parsedResult.back().dateTime = timeStruct;
+                }
+                prevPos = parsedResult.back().position, nextPos = parsedResult.back().position;
+
+                while (num+skipped < total) {
+                    element1 = element3.getSubElement(trkptString,num+skipped);
+                    ContainsAttribute(element1);
+
+                    latitude = element1.getAttribute("lat");
+                    longitude = element1.getAttribute("lon");
+                    if (element1.containsSubElement("ele")) {
+                        element2 = element1.getSubElement("ele");
+                        elevation = element2.getLeafContent();
+
+                        nextPos = Position(latitude,longitude,elevation);
+                    } else {
+                        nextPos = Position(latitude,longitude);
+                    }
+                    if (! element1.containsSubElement("time")) {
+                        throw domain_error("Missing 'time' element.");
+                    }
+                    element2 = element1.getSubElement("time");
+                    time = element2.getLeafContent();
+
+                    timeStream.str(time);
+                    timeStream >> std::get_time(&timeStruct,"%Y-%m-%dT%H:%M:%SZ");
+
+                    if (timeStream.fail()) {
+                        throw std::domain_error("Malformed date/time content: " + time);
+                    }
+                    if (element1.containsSubElement("name")) {
+                        element2 = element1.getSubElement("name");
+                        name = element2.getLeafContent();
+
+                        firstCharNotSpace = name.find_first_not_of(' ');
+                        lastCharNotSpace = name.find_last_not_of(' ');
+                        name = (firstCharNotSpace == -1) ? "" : name.substr(firstCharNotSpace,lastCharNotSpace-firstCharNotSpace+1);
+                    } else {
+                        name = ""; // Fixed bug by adding this.
+                    }
+                    parsedResult.push_back({nextPos, name, timeStruct});
+                    positionStream << "Position added: " << endl;
+                    positionStream << " at time: " << std::put_time(&timeStruct,"%c") << endl;
+                    ++num;
+                    prevPos = nextPos;
+                }
+            }
         }
+        positionStream << num << " positions added." << endl;
+        return parsedResult;
+    } catch (std::string error) {
+        throw std::domain_error(error);
     }
-    oss << num << " positions added." << endl;
-    return result;
 }
 }
