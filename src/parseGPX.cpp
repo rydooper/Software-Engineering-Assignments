@@ -4,23 +4,31 @@
 #include <iostream>
 #include "xml/parser.h"
 #include "parseGPX.h"
+#include <assert.h>
 using namespace std;
 using namespace GPS;
 using namespace XML;
 
-namespace GPX
-{
-void ContainsAttribute(Element element) {
+GPX::ParseData::ParseData(std::string source, bool isFileName) {
+    //assert(source != "");
+    this->source = source;
+    this->isFileName = isFileName;
+}
+
+bool GPX::ParseData::ContainsAttribute(XML::Element element) {
+    bool exceptionThrown = false;
     if (! element.containsAttribute("lat")) {
         throw domain_error("Missing 'lat' attribute.");
+        exceptionThrown = true;
     }
     if (! element.containsAttribute("lon")) {
         throw domain_error("Missing 'lon' attribute.");
+        exceptionThrown = true;
     }
+    return exceptionThrown;
 }
 
-//magic literals = changing for loops from numbers to named variables
-std::vector<GPS::RoutePoint> parseRoute(std::string source, bool isFileName) {
+std::vector<GPS::RoutePoint> GPX::ParseData::parseRoute() {
     int num=0, firstCharNotSpace, lastCharNotSpace, totalSubElements, skipped=0;
     string latitude, longitude, elevation, name, lineFromFile;
     ostringstream positionsStream, fileReadStream;
@@ -56,7 +64,8 @@ std::vector<GPS::RoutePoint> parseRoute(std::string source, bool isFileName) {
         totalSubElements = element.countSubElements("rtept");
         element1 = element.getSubElement("rtept");
 
-        ContainsAttribute(element1);
+        bool exceptionTest = GPX::ParseData::ContainsAttribute(element1);
+        assert(exceptionTest == false);
         latitude = element1.getAttribute("lat");
         longitude = element1.getAttribute("lon");
 
@@ -87,7 +96,8 @@ std::vector<GPS::RoutePoint> parseRoute(std::string source, bool isFileName) {
 
         while (num+skipped < totalSubElements) {
             element1 = element.getSubElement("rtept",num+skipped);
-            ContainsAttribute(element1);
+            bool exceptionTest = GPX::ParseData::ContainsAttribute(element1);
+            assert(exceptionTest == false);
 
             latitude = element1.getAttribute("lat");
             longitude = element1.getAttribute("lon");
@@ -119,7 +129,8 @@ std::vector<GPS::RoutePoint> parseRoute(std::string source, bool isFileName) {
     }
     return parsedResult;
 }
-std::vector<GPS::TrackPoint> parseTrack(std::string source, bool isFileName) {
+
+std::vector<GPS::TrackPoint> GPX::ParseData::parseTrack() {
     int num=0, firstCharNotSpace, lastCharNotSpace, total, skipped=0;
     string latitude, longitude, elevation, name, time, lineFromFile;
     const string trksegString = "trkseg";
@@ -163,7 +174,8 @@ std::vector<GPS::TrackPoint> parseTrack(std::string source, bool isFileName) {
             }
             total = element.countSubElements(trkptString);
             element1 = element.getSubElement(trkptString);
-            ContainsAttribute(element1);
+            bool exceptionTest = GPX::ParseData::ContainsAttribute(element1);
+            assert(exceptionTest == false);
 
             latitude = element1.getAttribute("lat");
             longitude = element1.getAttribute("lon");
@@ -210,7 +222,8 @@ std::vector<GPS::TrackPoint> parseTrack(std::string source, bool isFileName) {
 
             while (num+skipped < total) {
                 element1 = element.getSubElement(trkptString,num+skipped);
-                ContainsAttribute(element1);
+                bool exceptionTest = GPX::ParseData::ContainsAttribute(element1);
+                assert(exceptionTest == false);
 
                 latitude = element1.getAttribute("lat");
                 longitude = element1.getAttribute("lon");
@@ -265,7 +278,8 @@ std::vector<GPS::TrackPoint> parseTrack(std::string source, bool isFileName) {
                 // We have to set it here, rather than just before the loop, because num may increment in the next if-statement
                 if (segmentNum == 0) {
                     element1 = element3.getSubElement(trkptString);
-                    ContainsAttribute(element1);
+                    bool exceptionTest = GPX::ParseData::ContainsAttribute(element1);
+                    assert(exceptionTest == false);
 
                     latitude = element1.getAttribute("lat");
                     longitude = element1.getAttribute("lon");
@@ -314,7 +328,8 @@ std::vector<GPS::TrackPoint> parseTrack(std::string source, bool isFileName) {
 
                 while (num+skipped < total) {
                     element1 = element3.getSubElement(trkptString,num+skipped);
-                    ContainsAttribute(element1);
+                    bool exceptionTest = GPX::ParseData::ContainsAttribute(element1);
+                    assert(exceptionTest == false);
 
                     latitude = element1.getAttribute("lat");
                     longitude = element1.getAttribute("lon");
@@ -361,5 +376,4 @@ std::vector<GPS::TrackPoint> parseTrack(std::string source, bool isFileName) {
     } catch (std::string error) {
         throw std::domain_error(error);
     }
-}
 }

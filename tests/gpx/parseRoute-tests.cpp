@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <fstream>
 #include <filesystem>
+#include <vector>
 
 #include "logs.h"
 #include "parseGPX.h"
@@ -26,7 +27,10 @@ BOOST_AUTO_TEST_CASE( onePoint )
 
     const bool isFileName = false;
 
-    std::vector<RoutePoint> routePoints = GPX::parseRoute(source, isFileName);
+    GPX::ParseData Parse(source, isFileName);
+    std::vector<GPS::RoutePoint> routePoints = Parse.parseRoute();
+
+    //std::vector<RoutePoint> routePoints = GPX::parseRoute(source, isFileName);
 
     BOOST_REQUIRE_EQUAL(routePoints.size() , 1);
 
@@ -43,7 +47,8 @@ BOOST_AUTO_TEST_CASE( twoPoints )
 
     const bool isFileName = false;
 
-    std::vector<RoutePoint> routePoints = GPX::parseRoute(source, isFileName);
+    GPX::ParseData Parse(source, isFileName);
+    std::vector<GPS::RoutePoint> routePoints = Parse.parseRoute();
 
     BOOST_REQUIRE_EQUAL(routePoints.size() , 2);
 
@@ -70,7 +75,8 @@ BOOST_AUTO_TEST_CASE( NoNameElement )
 
     const bool isFileName = false;
 
-    std::vector<RoutePoint> routePoints = GPX::parseRoute(source, isFileName);
+    GPX::ParseData Parse(source, isFileName);
+    std::vector<GPS::RoutePoint> routePoints = Parse.parseRoute();
 
     BOOST_REQUIRE_EQUAL(routePoints.size() , 1);
     BOOST_CHECK_EQUAL(routePoints[0].name , routePointNotNamed);
@@ -84,7 +90,8 @@ BOOST_AUTO_TEST_CASE( EmptyNameElement )
 
     const bool isFileName = false;
 
-    std::vector<RoutePoint> routePoints = GPX::parseRoute(source, isFileName);
+    GPX::ParseData Parse(source, isFileName);
+    std::vector<GPS::RoutePoint> routePoints = Parse.parseRoute();
 
     BOOST_REQUIRE_EQUAL(routePoints.size() , 1);
     BOOST_CHECK_EQUAL(routePoints[0].name , routePointNotNamed);
@@ -98,7 +105,8 @@ BOOST_AUTO_TEST_CASE( oneNamedPoint )
 
     const bool isFileName = false;
 
-    std::vector<RoutePoint> routePoints = GPX::parseRoute(source, isFileName);
+    GPX::ParseData Parse(source, isFileName);
+    std::vector<GPS::RoutePoint> routePoints = Parse.parseRoute();
 
     BOOST_REQUIRE_EQUAL(routePoints.size() , 1);
     BOOST_CHECK_EQUAL(routePoints[0].name , "MyPoint");
@@ -112,7 +120,8 @@ BOOST_AUTO_TEST_CASE( twoNamedPoints )
 
     const bool isFileName = false;
 
-    std::vector<RoutePoint> routePoints = GPX::parseRoute(source, isFileName);
+    GPX::ParseData Parse(source, isFileName);
+    std::vector<GPS::RoutePoint> routePoints = Parse.parseRoute();
 
     BOOST_REQUIRE_EQUAL(routePoints.size() , 2);
     BOOST_CHECK_EQUAL(routePoints[0].name , "Start");
@@ -127,7 +136,8 @@ BOOST_AUTO_TEST_CASE( oneOfTwoNamedPoints )
 
     const bool isFileName = false;
 
-    std::vector<RoutePoint> routePoints = GPX::parseRoute(source, isFileName);
+    GPX::ParseData Parse(source, isFileName);
+    std::vector<GPS::RoutePoint> routePoints = Parse.parseRoute();
 
     BOOST_REQUIRE_EQUAL(routePoints.size() , 2);
     BOOST_CHECK_EQUAL(routePoints[0].name , routePointNotNamed);
@@ -142,7 +152,8 @@ BOOST_AUTO_TEST_CASE( TrimLeadingWhitespace )
 
     const bool isFileName = false;
 
-    std::vector<RoutePoint> routePoints = GPX::parseRoute(source, isFileName);
+    GPX::ParseData Parse(source, isFileName);
+    std::vector<GPS::RoutePoint> routePoints = Parse.parseRoute();
 
     BOOST_REQUIRE_EQUAL(routePoints.size() , 1);
     BOOST_CHECK_EQUAL(routePoints[0].name , "MyPoint");
@@ -156,7 +167,8 @@ BOOST_AUTO_TEST_CASE( TrimTrailingWhitespace )
 
     const bool isFileName = false;
 
-    std::vector<RoutePoint> routePoints = GPX::parseRoute(source, isFileName);
+    GPX::ParseData Parse(source, isFileName);
+    std::vector<GPS::RoutePoint> routePoints = Parse.parseRoute();
 
     BOOST_REQUIRE_EQUAL(routePoints.size() , 1);
     BOOST_CHECK_EQUAL(routePoints[0].name , "MyPoint");
@@ -170,7 +182,8 @@ BOOST_AUTO_TEST_CASE( AllowInternalWhitespace )
 
     const bool isFileName = false;
 
-    std::vector<RoutePoint> routePoints = GPX::parseRoute(source, isFileName);
+    GPX::ParseData Parse(source, isFileName);
+    std::vector<GPS::RoutePoint> routePoints = Parse.parseRoute();
 
     BOOST_REQUIRE_EQUAL(routePoints.size() , 1);
     BOOST_CHECK_EQUAL(routePoints[0].name , "My Point");
@@ -184,7 +197,8 @@ BOOST_AUTO_TEST_CASE( TrimEntirelyWhitespace )
 
     const bool isFileName = false;
 
-    std::vector<RoutePoint> routePoints = GPX::parseRoute(source, isFileName);
+    GPX::ParseData Parse(source, isFileName);
+    std::vector<GPS::RoutePoint> routePoints = Parse.parseRoute();
 
     BOOST_REQUIRE_EQUAL(routePoints.size() , 1);
     BOOST_CHECK_EQUAL(routePoints[0].name , routePointNotNamed);
@@ -212,7 +226,8 @@ BOOST_AUTO_TEST_CASE( threeUnnamedPoints )
     requireFileExists(source);
     const bool isFileName = true;
 
-    std::vector<RoutePoint> routePoints = GPX::parseRoute(source, isFileName);
+    GPX::ParseData Parse(source, isFileName);
+    std::vector<GPS::RoutePoint> routePoints = Parse.parseRoute();
 
     BOOST_REQUIRE_EQUAL(routePoints.size() , 3);
 
@@ -239,7 +254,8 @@ BOOST_AUTO_TEST_CASE( fileContainingExtraData )
     requireFileExists(source);
     const bool isFileName = true;
 
-    std::vector<RoutePoint> routePoints = GPX::parseRoute(source, isFileName);
+    GPX::ParseData Parse(source, isFileName);
+    std::vector<GPS::RoutePoint> routePoints = Parse.parseRoute();
 
     BOOST_REQUIRE_EQUAL(routePoints.size() , 3);
 
@@ -266,7 +282,8 @@ BOOST_AUTO_TEST_CASE( realGPXData )
     requireFileExists(source);
     const bool isFileName = true;
 
-    std::vector<RoutePoint> routePoints = GPX::parseRoute(source, isFileName);
+    GPX::ParseData Parse(source, isFileName);
+    std::vector<GPS::RoutePoint> routePoints = Parse.parseRoute();
 
     BOOST_REQUIRE_EQUAL(routePoints.size() , 1091);
 
@@ -297,11 +314,11 @@ BOOST_AUTO_TEST_CASE( nonexistantFile )
 
     // Ensure the file really doesn't exist, otherwise the test won't be valid.
     BOOST_REQUIRE( nullHandle.fail() );
-
-    BOOST_REQUIRE_THROW( GPX::parseRoute(fileName, isFileName), std::invalid_argument);
+    GPX::ParseData Parse(fileName, isFileName);
+    BOOST_REQUIRE_THROW( Parse.parseRoute(), std::invalid_argument);
     try
     {
-        GPX::parseRoute(fileName, isFileName);
+        Parse.parseRoute();
     }
     catch (const std::invalid_argument & e)
     {
@@ -314,11 +331,12 @@ BOOST_AUTO_TEST_CASE( missing_gpx_element )
 {
     const std::string source = "<rte><rtept lat=\"0\" lon=\"0\"><ele>1</ele></rtept></rte>";
     const bool isFileName = false;
+    GPX::ParseData Parse(source, isFileName);
 
-    BOOST_REQUIRE_THROW( GPX::parseRoute(source,isFileName) , std::domain_error);
+    BOOST_REQUIRE_THROW( Parse.parseRoute() , std::domain_error);
     try
     {
-        GPX::parseRoute(source, isFileName);
+        Parse.parseRoute();
     }
     catch (const std::domain_error & e)
     {
@@ -331,11 +349,11 @@ BOOST_AUTO_TEST_CASE( missing_rte_element )
 {
     const std::string source = "<gpx><rtept lat=\"0\" lon=\"0\"><ele>1</ele></rtept></gpx>";
     const bool isFileName = false;
-
-    BOOST_REQUIRE_THROW( GPX::parseRoute(source,isFileName) , std::domain_error);
+    GPX::ParseData Parse(source, isFileName);
+    BOOST_REQUIRE_THROW( Parse.parseRoute() , std::domain_error);
     try
     {
-        GPX::parseRoute(source, isFileName);
+        Parse.parseRoute();
     }
     catch (const std::domain_error & e)
     {
@@ -348,11 +366,11 @@ BOOST_AUTO_TEST_CASE( missing_rtept_element )
 {
     const std::string source = "<gpx><rte></rte></gpx>";
     const bool isFileName = false;
-
-    BOOST_REQUIRE_THROW( GPX::parseRoute(source,isFileName) , std::domain_error);
+    GPX::ParseData Parse(source, isFileName);
+    BOOST_REQUIRE_THROW( Parse.parseRoute() , std::domain_error);
     try
     {
-        GPX::parseRoute(source, isFileName);
+        Parse.parseRoute();
     }
     catch (const std::domain_error & e)
     {
@@ -365,11 +383,12 @@ BOOST_AUTO_TEST_CASE( missing_lat_attribute )
 {
     const std::string source = "<gpx><rte><rtept lon=\"0\"><ele>1</ele></rtept></rte></gpx>";
     const bool isFileName = false;
+    GPX::ParseData Parse(source, isFileName);
 
-    BOOST_REQUIRE_THROW( GPX::parseRoute(source,isFileName) , std::domain_error);
+    BOOST_REQUIRE_THROW( Parse.parseRoute() , std::domain_error);
     try
     {
-        GPX::parseRoute(source, isFileName);
+        Parse.parseRoute();
     }
     catch (const std::domain_error & e)
     {
@@ -382,11 +401,11 @@ BOOST_AUTO_TEST_CASE( missing_lon_attribute )
 {
     const std::string source = "<gpx><rte><rtept lat=\"0\"><ele>1</ele></rtept></rte></gpx>";
     const bool isFileName = false;
-
-    BOOST_REQUIRE_THROW( GPX::parseRoute(source,isFileName) , std::domain_error);
+    GPX::ParseData Parse(source, isFileName);
+    BOOST_REQUIRE_THROW( Parse.parseRoute() , std::domain_error);
     try
     {
-        GPX::parseRoute(source, isFileName);
+        Parse.parseRoute();
     }
     catch (const std::domain_error & e)
     {
