@@ -13,6 +13,8 @@ namespace GPX
         public:
             ParseData(std::string source, bool isFileName);
             bool ContainsAttribute(XML::Element element);
+            bool ContainsSubElement(XML::Element element, std::string inputString);
+            bool GetName(XML::Element element, std::string inputString);
             std::vector<GPS::RoutePoint> parseRoute();
             std::vector<GPS::TrackPoint> parseTrack();
 

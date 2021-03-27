@@ -28,8 +28,26 @@ bool GPX::ParseData::ContainsAttribute(XML::Element element) {
     return exceptionThrown;
 }
 
+bool GPX::ParseData::ContainsSubElement(XML::Element element, string inputString) {
+    bool exceptionThrown = false;
+    if (! element.containsSubElement(inputString)) {
+        throw domain_error("Missing '" + inputString + "' element.");
+        exceptionThrown = true;
+    }
+    return exceptionThrown;
+}
+
+bool GPX::ParseData::GetName(XML::Element element, string inputString) {
+    bool exceptionThrown = false;
+    if (element.getName() != inputString) {
+        throw domain_error("Missing '" + inputString + "' element.");
+        exceptionThrown = true;
+    }
+    return exceptionThrown;
+}
+
 std::vector<GPS::RoutePoint> GPX::ParseData::parseRoute() {
-    int num=0, firstCharNotSpace, lastCharNotSpace, totalSubElements, skipped=0;
+    int num=0, firstCharNotSpace, lastCharNotSpace, totalSubElements;
     string latitude, longitude, elevation, name, lineFromFile;
     ostringstream positionsStream, fileReadStream;
     std::vector<RoutePoint> parsedResult;
@@ -50,17 +68,12 @@ std::vector<GPS::RoutePoint> GPX::ParseData::parseRoute() {
         }
 
         element = Parser(source).parseRootElement();
-        if (element.getName() != "gpx") {
-            throw domain_error("Missing 'gpx' element.");
-        }
-        if (! element.containsSubElement("rte")) {
-            throw domain_error("Missing 'rte' element.");
-        }
+        assert(GetName(element, "gpx") == false);
+        assert(ContainsSubElement(element, "rte") == false);
+
         element = element.getSubElement("rte");
 
-        if (! element.containsSubElement("rtept")) {
-            throw domain_error("Missing 'rtept' element.");
-        }
+        assert(ContainsSubElement(element, "rtept") == false);
         totalSubElements = element.countSubElements("rtept");
         element1 = element.getSubElement("rtept");
 
@@ -94,8 +107,8 @@ std::vector<GPS::RoutePoint> GPX::ParseData::parseRoute() {
         parsedResult.front().name = name;
         prevPos = parsedResult.back().position, nextPos = parsedResult.back().position;
 
-        while (num+skipped < totalSubElements) {
-            element1 = element.getSubElement("rtept",num+skipped);
+        while (num < totalSubElements) {        //skipped removed as it didn't change in while and added 0 to num (making it redundant)
+            element1 = element.getSubElement("rtept",num);
             bool exceptionTest = GPX::ParseData::ContainsAttribute(element1);
             assert(exceptionTest == false);
 
@@ -160,18 +173,14 @@ std::vector<GPS::TrackPoint> GPX::ParseData::parseTrack() {
         }
 
         element = Parser(source).parseRootElement();
-        if (element.getName() != "gpx") {
-            throw domain_error("Missing 'gpx' element.");
-        }
-        if (! element.containsSubElement(trkString)) {
-            throw domain_error("Missing 'trk' element.");
-        }
+
+        assert(GetName(element, "gpx") == false);
+        assert(ContainsSubElement(element, trkString) == false);
 
         element = element.getSubElement(trkString);
         if (! element.containsSubElement(trksegString)) {
-            if (! element.containsSubElement(trkptString)) {
-                throw domain_error("Missing 'trkpt' element.");
-            }
+            assert(ContainsSubElement(element, trkptString) == false);
+
             total = element.countSubElements(trkptString);
             element1 = element.getSubElement(trkptString);
             bool exceptionTest = GPX::ParseData::ContainsAttribute(element1);
@@ -205,9 +214,8 @@ std::vector<GPS::TrackPoint> GPX::ParseData::parseTrack() {
             }
 
             parsedResult.back().name = name;
-            if (! element1.containsSubElement("time")) {
-                throw domain_error("Missing 'time' element.");
-            }
+            assert(ContainsSubElement(element1, "time") == false);
+
             element2 = element1.getSubElement("time");
             time = element2.getLeafContent();
 
@@ -235,9 +243,9 @@ std::vector<GPS::TrackPoint> GPX::ParseData::parseTrack() {
                 } else {
                     nextPos = Position(latitude,longitude);
                 }
-                if (! element1.containsSubElement("time")) {
-                    throw domain_error("Missing 'time' element.");
-                }
+
+                assert(ContainsSubElement(element1, "time") == false);
+
                 element2 = element1.getSubElement("time");
                 time = element2.getLeafContent();
 
@@ -269,9 +277,7 @@ std::vector<GPS::TrackPoint> GPX::ParseData::parseTrack() {
 
             for (segmentNum=0; segmentNum < element.countSubElements(trksegString); ++segmentNum) {
                 element3 = element.getSubElement(trksegString, segmentNum);
-                if (! element3.containsSubElement(trkptString)) {
-                    throw domain_error("Missing 'trkpt' element.");
-                }
+                assert(ContainsSubElement(element3, trkptString) == false);
 
                 total = element3.countSubElements(trkptString);
                 skipped = -num; // Setting skipped to start at -num (rather than 0) cancels any points accumulated from previous segments
@@ -310,9 +316,7 @@ std::vector<GPS::TrackPoint> GPX::ParseData::parseTrack() {
                     }
 
                     parsedResult.back().name = name;
-                    if (! element1.containsSubElement("time")) {
-                        throw domain_error("Missing 'time' element.");
-                    }
+                    assert(ContainsSubElement(element1, "time") == false);
 
                     element2 = element1.getSubElement("time");
                     time = element2.getLeafContent();
@@ -326,8 +330,10 @@ std::vector<GPS::TrackPoint> GPX::ParseData::parseTrack() {
                 }
                 prevPos = parsedResult.back().position, nextPos = parsedResult.back().position;
 
+                int numSkippedTotal;
                 while (num+skipped < total) {
-                    element1 = element3.getSubElement(trkptString,num+skipped);
+                    numSkippedTotal = num + skipped;
+                    element1 = element3.getSubElement(trkptString,numSkippedTotal);
                     bool exceptionTest = GPX::ParseData::ContainsAttribute(element1);
                     assert(exceptionTest == false);
 
@@ -341,9 +347,9 @@ std::vector<GPS::TrackPoint> GPX::ParseData::parseTrack() {
                     } else {
                         nextPos = Position(latitude,longitude);
                     }
-                    if (! element1.containsSubElement("time")) {
-                        throw domain_error("Missing 'time' element.");
-                    }
+
+                    assert(ContainsSubElement(element1, "time") == false);
+
                     element2 = element1.getSubElement("time");
                     time = element2.getLeafContent();
 
