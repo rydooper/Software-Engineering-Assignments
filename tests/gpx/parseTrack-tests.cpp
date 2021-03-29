@@ -50,8 +50,10 @@ BOOST_AUTO_TEST_CASE( onePoint )
       "<gpx><trk><trkpt lat=\"20\" lon=\"70\"><ele>250</ele><time>2020-03-23T13:00:01Z</time></trkpt></trk></gpx>";
 
     const bool isFileName = false;
-    GPX::ParseData Parse(source, isFileName);
-    std::vector<GPS::TrackPoint> trackPoints = Parse.parseTrack();
+    int num=0, firstCharNotDelimiterIndex=0, lastCharNotDelimiterIndex=0;
+    std::string LatAttributeString = "lat", LongAttributeString = "lon";
+    GPX::ParseData Parse(source, isFileName, num, firstCharNotDelimiterIndex, lastCharNotDelimiterIndex, LatAttributeString, LongAttributeString); //decalres the class constructor that will be used in the test -> this is used in every test in this file
+    std::vector<GPS::TrackPoint> trackPoints = Parse.parseTrack(); //calls the parseTrack() function
 
     BOOST_REQUIRE_EQUAL(trackPoints.size() , 1);
 
@@ -75,7 +77,9 @@ BOOST_AUTO_TEST_CASE( twoPoints )
 
     const bool isFileName = false;
 
-    GPX::ParseData Parse(source, isFileName);
+    int num=0, firstCharNotDelimiterIndex=0, lastCharNotDelimiterIndex=0;
+    std::string LatAttributeString = "lat", LongAttributeString = "lon";
+    GPX::ParseData Parse(source, isFileName, num, firstCharNotDelimiterIndex, lastCharNotDelimiterIndex, LatAttributeString, LongAttributeString);
     std::vector<GPS::TrackPoint> trackPoints = Parse.parseTrack();
 
     BOOST_REQUIRE_EQUAL(trackPoints.size() , 2);
@@ -117,7 +121,9 @@ BOOST_AUTO_TEST_CASE( NoNameElement )
 
     const bool isFileName = false;
 
-    GPX::ParseData Parse(source, isFileName);
+    int num=0, firstCharNotDelimiterIndex=0, lastCharNotDelimiterIndex=0;
+    std::string LatAttributeString = "lat", LongAttributeString = "lon";
+    GPX::ParseData Parse(source, isFileName, num, firstCharNotDelimiterIndex, lastCharNotDelimiterIndex, LatAttributeString, LongAttributeString);
     std::vector<GPS::TrackPoint> trackPoints = Parse.parseTrack();
 
     BOOST_REQUIRE_EQUAL(trackPoints.size() , 1);
@@ -132,7 +138,9 @@ BOOST_AUTO_TEST_CASE( EmptyNameElement )
 
     const bool isFileName = false;
 
-    GPX::ParseData Parse(source, isFileName);
+    int num=0, firstCharNotDelimiterIndex=0, lastCharNotDelimiterIndex=0;
+    std::string LatAttributeString = "lat", LongAttributeString = "lon";
+    GPX::ParseData Parse(source, isFileName, num, firstCharNotDelimiterIndex, lastCharNotDelimiterIndex, LatAttributeString, LongAttributeString);
     std::vector<GPS::TrackPoint> trackPoints = Parse.parseTrack();
 
     BOOST_REQUIRE_EQUAL(trackPoints.size() , 1);
@@ -147,7 +155,9 @@ BOOST_AUTO_TEST_CASE( oneNamedPoint )
 
     const bool isFileName = false;
 
-    GPX::ParseData Parse(source, isFileName);
+    int num=0, firstCharNotDelimiterIndex=0, lastCharNotDelimiterIndex=0;
+    std::string LatAttributeString = "lat", LongAttributeString = "lon";
+    GPX::ParseData Parse(source, isFileName, num, firstCharNotDelimiterIndex, lastCharNotDelimiterIndex, LatAttributeString, LongAttributeString);
     std::vector<GPS::TrackPoint> trackPoints = Parse.parseTrack();
 
     BOOST_REQUIRE_EQUAL(trackPoints.size() , 1);
@@ -162,7 +172,9 @@ BOOST_AUTO_TEST_CASE( twoNamedPoints )
 
     const bool isFileName = false;
 
-    GPX::ParseData Parse(source, isFileName);
+    int num=0, firstCharNotDelimiterIndex=0, lastCharNotDelimiterIndex=0;
+    std::string LatAttributeString = "lat", LongAttributeString = "lon";
+    GPX::ParseData Parse(source, isFileName, num, firstCharNotDelimiterIndex, lastCharNotDelimiterIndex, LatAttributeString, LongAttributeString);
     std::vector<GPS::TrackPoint> trackPoints = Parse.parseTrack();
 
     BOOST_REQUIRE_EQUAL(trackPoints.size() , 2);
@@ -178,7 +190,9 @@ BOOST_AUTO_TEST_CASE( oneOfTwoNamedPoints )
 
     const bool isFileName = false;
 
-    GPX::ParseData Parse(source, isFileName);
+    int num=0, firstCharNotDelimiterIndex=0, lastCharNotDelimiterIndex=0;
+    std::string LatAttributeString = "lat", LongAttributeString = "lon";
+    GPX::ParseData Parse(source, isFileName, num, firstCharNotDelimiterIndex, lastCharNotDelimiterIndex, LatAttributeString, LongAttributeString);
     std::vector<GPS::TrackPoint> trackPoints = Parse.parseTrack();
 
     BOOST_REQUIRE_EQUAL(trackPoints.size() , 2);
@@ -194,7 +208,9 @@ BOOST_AUTO_TEST_CASE( TrimLeadingWhitespace )
 
     const bool isFileName = false;
 
-    GPX::ParseData Parse(source, isFileName);
+    int num=0, firstCharNotDelimiterIndex=0, lastCharNotDelimiterIndex=0;
+    std::string LatAttributeString = "lat", LongAttributeString = "lon";
+    GPX::ParseData Parse(source, isFileName, num, firstCharNotDelimiterIndex, lastCharNotDelimiterIndex, LatAttributeString, LongAttributeString);
     std::vector<GPS::TrackPoint> trackPoints = Parse.parseTrack();
 
     BOOST_REQUIRE_EQUAL(trackPoints.size() , 1);
@@ -209,7 +225,9 @@ BOOST_AUTO_TEST_CASE( TrimTrailingWhitespace )
 
     const bool isFileName = false;
 
-    GPX::ParseData Parse(source, isFileName);
+    int num=0, firstCharNotDelimiterIndex=0, lastCharNotDelimiterIndex=0;
+    std::string LatAttributeString = "lat", LongAttributeString = "lon";
+    GPX::ParseData Parse(source, isFileName, num, firstCharNotDelimiterIndex, lastCharNotDelimiterIndex, LatAttributeString, LongAttributeString);
     std::vector<GPS::TrackPoint> trackPoints = Parse.parseTrack();
 
     BOOST_REQUIRE_EQUAL(trackPoints.size() , 1);
@@ -224,7 +242,9 @@ BOOST_AUTO_TEST_CASE( AllowInternalWhitespace )
 
     const bool isFileName = false;
 
-    GPX::ParseData Parse(source, isFileName);
+    int num=0, firstCharNotDelimiterIndex=0, lastCharNotDelimiterIndex=0;
+    std::string LatAttributeString = "lat", LongAttributeString = "lon";
+    GPX::ParseData Parse(source, isFileName, num, firstCharNotDelimiterIndex, lastCharNotDelimiterIndex, LatAttributeString, LongAttributeString);
     std::vector<GPS::TrackPoint> trackPoints = Parse.parseTrack();
 
     BOOST_REQUIRE_EQUAL(trackPoints.size() , 1);
@@ -239,7 +259,9 @@ BOOST_AUTO_TEST_CASE( TrimEntirelyWhitespace )
 
     const bool isFileName = false;
 
-    GPX::ParseData Parse(source, isFileName);
+    int num=0, firstCharNotDelimiterIndex=0, lastCharNotDelimiterIndex=0;
+    std::string LatAttributeString = "lat", LongAttributeString = "lon";
+    GPX::ParseData Parse(source, isFileName, num, firstCharNotDelimiterIndex, lastCharNotDelimiterIndex, LatAttributeString, LongAttributeString);
     std::vector<GPS::TrackPoint> trackPoints = Parse.parseTrack();
 
     BOOST_REQUIRE_EQUAL(trackPoints.size() , 1);
@@ -259,7 +281,9 @@ BOOST_AUTO_TEST_CASE( threeUnnamedPoints )
     requireFileExists(source);
     const bool isFileName = true;
 
-    GPX::ParseData Parse(source, isFileName);
+    int num=0, firstCharNotDelimiterIndex=0, lastCharNotDelimiterIndex=0;
+    std::string LatAttributeString = "lat", LongAttributeString = "lon";
+    GPX::ParseData Parse(source, isFileName, num, firstCharNotDelimiterIndex, lastCharNotDelimiterIndex, LatAttributeString, LongAttributeString);
     std::vector<GPS::TrackPoint> trackPoints = Parse.parseTrack();
 
     BOOST_REQUIRE_EQUAL(trackPoints.size() , 3);
@@ -311,7 +335,9 @@ BOOST_AUTO_TEST_CASE( fileContainingExtraData )
     requireFileExists(source);
     const bool isFileName = true;
 
-    GPX::ParseData Parse(source, isFileName);
+    int num=0, firstCharNotDelimiterIndex=0, lastCharNotDelimiterIndex=0;
+    std::string LatAttributeString = "lat", LongAttributeString = "lon";
+    GPX::ParseData Parse(source, isFileName, num, firstCharNotDelimiterIndex, lastCharNotDelimiterIndex, LatAttributeString, LongAttributeString);
     std::vector<GPS::TrackPoint> trackPoints = Parse.parseTrack();
 
     BOOST_REQUIRE_EQUAL(trackPoints.size() , 3);
@@ -369,7 +395,9 @@ BOOST_AUTO_TEST_CASE( nonexistantFile )
 
     std::string fileName = LogFiles::GPXRoutesDir + "NonexistantFile.gpx";
     std::ifstream nullHandle = std::ifstream(fileName);
-    GPX::ParseData Parse(fileName, isFileName);
+    int num=0, firstCharNotDelimiterIndex=0, lastCharNotDelimiterIndex=0;
+    std::string LatAttributeString = "lat", LongAttributeString = "lon";
+    GPX::ParseData Parse(fileName, isFileName, num, firstCharNotDelimiterIndex, lastCharNotDelimiterIndex, LatAttributeString, LongAttributeString);
     // Ensure the file really doesn't exist, otherwise the test won't be valid.
     BOOST_REQUIRE( nullHandle.fail() );
 
@@ -389,7 +417,9 @@ BOOST_AUTO_TEST_CASE( missing_gpx_element )
 {
     const std::string source = "<trk><trkpt lat=\"0\" lon=\"0\"><ele>1</ele><time>1970-01-01T00:00:01Z</time></trkpt></trk>";
     const bool isFileName = false;
-    GPX::ParseData Parse(source, isFileName);
+    int num=0, firstCharNotDelimiterIndex=0, lastCharNotDelimiterIndex=0;
+    std::string LatAttributeString = "lat", LongAttributeString = "lon";
+    GPX::ParseData Parse(source, isFileName, num, firstCharNotDelimiterIndex, lastCharNotDelimiterIndex, LatAttributeString, LongAttributeString);
     BOOST_REQUIRE_THROW( Parse.parseTrack() , std::domain_error);
     try
     {
@@ -406,7 +436,9 @@ BOOST_AUTO_TEST_CASE( missing_trk_element )
 {
     const std::string source = "<gpx><trkpt lat=\"0\" lon=\"0\"><ele>1</ele><time>1970-01-01T00:00:01Z</time></trkpt></gpx>";
     const bool isFileName = false;
-    GPX::ParseData Parse(source, isFileName);
+    int num=0, firstCharNotDelimiterIndex=0, lastCharNotDelimiterIndex=0;
+    std::string LatAttributeString = "lat", LongAttributeString = "lon";
+    GPX::ParseData Parse(source, isFileName, num, firstCharNotDelimiterIndex, lastCharNotDelimiterIndex, LatAttributeString, LongAttributeString);
     BOOST_REQUIRE_THROW( Parse.parseTrack() , std::domain_error);
     try
     {
@@ -423,7 +455,9 @@ BOOST_AUTO_TEST_CASE( missing_trkpt_element )
 {
     const std::string source = "<gpx><trk></trk></gpx>";
     const bool isFileName = false;
-    GPX::ParseData Parse(source, isFileName);
+    int num=0, firstCharNotDelimiterIndex=0, lastCharNotDelimiterIndex=0;
+    std::string LatAttributeString = "lat", LongAttributeString = "lon";
+    GPX::ParseData Parse(source, isFileName, num, firstCharNotDelimiterIndex, lastCharNotDelimiterIndex, LatAttributeString, LongAttributeString);
     BOOST_REQUIRE_THROW( Parse.parseTrack() , std::domain_error);
     try
     {
@@ -440,7 +474,9 @@ BOOST_AUTO_TEST_CASE( missing_lat_attribute )
 {
     const std::string source = "<gpx><trk><trkpt lon=\"0\"><ele>1</ele><time>1970-01-01T00:00:01Z</time></trkpt></trk></gpx>";
     const bool isFileName = false;
-    GPX::ParseData Parse(source, isFileName);
+    int num=0, firstCharNotDelimiterIndex=0, lastCharNotDelimiterIndex=0;
+    std::string LatAttributeString = "lat", LongAttributeString = "lon";
+    GPX::ParseData Parse(source, isFileName, num, firstCharNotDelimiterIndex, lastCharNotDelimiterIndex, LatAttributeString, LongAttributeString);
     BOOST_REQUIRE_THROW( Parse.parseTrack() , std::domain_error);
     try
     {
@@ -457,7 +493,9 @@ BOOST_AUTO_TEST_CASE( missing_lon_attribute )
 {
     const std::string source = "<gpx><trk><trkpt lat=\"0\"><ele>1</ele><time>1970-01-01T00:00:01Z</time></trkpt></trk></gpx>";
     const bool isFileName = false;
-    GPX::ParseData Parse(source, isFileName);
+    int num=0, firstCharNotDelimiterIndex=0, lastCharNotDelimiterIndex=0;
+    std::string LatAttributeString = "lat", LongAttributeString = "lon";
+    GPX::ParseData Parse(source, isFileName, num, firstCharNotDelimiterIndex, lastCharNotDelimiterIndex, LatAttributeString, LongAttributeString);
     BOOST_REQUIRE_THROW( Parse.parseTrack() , std::domain_error);
     try
     {
@@ -474,7 +512,9 @@ BOOST_AUTO_TEST_CASE( missing_time_element )
 {
     const std::string source = "<gpx><trk><trkpt lat=\"0\" lon=\"0\"><ele>1</ele></trkpt></trk></gpx>";
     const bool isFileName = false;
-    GPX::ParseData Parse(source, isFileName);
+    int num=0, firstCharNotDelimiterIndex=0, lastCharNotDelimiterIndex=0;
+    std::string LatAttributeString = "lat", LongAttributeString = "lon";
+    GPX::ParseData Parse(source, isFileName, num, firstCharNotDelimiterIndex, lastCharNotDelimiterIndex, LatAttributeString, LongAttributeString);
     BOOST_REQUIRE_THROW( Parse.parseTrack() , std::domain_error);
     try
     {
@@ -499,7 +539,9 @@ BOOST_AUTO_TEST_CASE( onePointSegment )
       "<gpx><trk><trkseg><trkpt lat=\"20\" lon=\"70\"><ele>250</ele><time>2020-03-23T13:00:01Z</time><name>Here</name></trkpt></trkseg></trk></gpx>";
 
     const bool isFileName = false;
-    GPX::ParseData Parse(source, isFileName);
+    int num=0, firstCharNotDelimiterIndex=0, lastCharNotDelimiterIndex=0;
+    std::string LatAttributeString = "lat", LongAttributeString = "lon";
+    GPX::ParseData Parse(source, isFileName, num, firstCharNotDelimiterIndex, lastCharNotDelimiterIndex, LatAttributeString, LongAttributeString);
     std::vector<TrackPoint> trackPoints = Parse.parseTrack();
 
     BOOST_REQUIRE_EQUAL(trackPoints.size() , 1);
@@ -524,7 +566,9 @@ BOOST_AUTO_TEST_CASE( twoPointSegment )
       "<gpx><trk><trkseg><trkpt lat=\"20\" lon=\"70\"><ele>250</ele><time>2020-03-23T13:00:01Z</time><name>Here</name></trkpt><trkpt lat=\"60\" lon=\"120\"><ele>5</ele><time>2020-11-05T00:01:59Z</time><name>There</name></trkpt></trkseg></trk></gpx>";
 
     const bool isFileName = false;
-    GPX::ParseData Parse(source, isFileName);
+    int num=0, firstCharNotDelimiterIndex=0, lastCharNotDelimiterIndex=0;
+    std::string LatAttributeString = "lat", LongAttributeString = "lon";
+    GPX::ParseData Parse(source, isFileName, num, firstCharNotDelimiterIndex, lastCharNotDelimiterIndex, LatAttributeString, LongAttributeString);
     std::vector<TrackPoint> trackPoints = Parse.parseTrack();
 
     BOOST_REQUIRE_EQUAL(trackPoints.size() , 2);
@@ -562,7 +606,9 @@ BOOST_AUTO_TEST_CASE( multipleSegments )
     const std::string source = LogFiles::GPXTracksDir + "MultipleSegments.gpx";
     requireFileExists(source);
     const bool isFileName = true;
-    GPX::ParseData Parse(source, isFileName);
+    int num=0, firstCharNotDelimiterIndex=0, lastCharNotDelimiterIndex=0;
+    std::string LatAttributeString = "lat", LongAttributeString = "lon";
+    GPX::ParseData Parse(source, isFileName, num, firstCharNotDelimiterIndex, lastCharNotDelimiterIndex, LatAttributeString, LongAttributeString);
     std::vector<TrackPoint> trackPoints = Parse.parseTrack();
 
     BOOST_REQUIRE_EQUAL(trackPoints.size() , 9);

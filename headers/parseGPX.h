@@ -9,31 +9,24 @@
 
 namespace GPX
 {
-    class ParseData {
-        public:
-            ParseData(std::string source, bool isFileName);
-            bool ContainsAttribute(XML::Element element);
-            bool ContainsSubElement(XML::Element element, std::string inputString);
-            bool GetName(XML::Element element, std::string inputString);
-            std::vector<GPS::RoutePoint> parseRoute();
-            std::vector<GPS::TrackPoint> parseTrack();
+    class ParseData { //Contains the parsing methods and attributes to be used throughout the program
+        public: //the methods (functions) that will be used in the program
+            ParseData(std::string source, bool isFileName, int num, int firstCharNotDelimiterIndex, int lastCharNotDelimiterIndex, std::string LatAttributeString, std::string LongAttributeString); //ParseData public construcutor to be called whenever the class is needed
+            bool ContainsAttribute(XML::Element element, std::string LatAttributeString, std::string LongAttributeString); //returns whether the element object contains the input string attribute
+            bool ContainsSubElement(XML::Element element, std::string inputString); //returns whether the element object contains the input string sub element
+            bool GetName(XML::Element element, std::string inputString); //returns whether the data returned from the getName() function matches the input string
+            std::vector<GPS::RoutePoint> parseRoute(); //Parses GPX data containing a route
+            std::vector<GPS::TrackPoint> parseTrack(); //Parses GPX data containing a track
 
-        private:
-            std::string source;
+        private: //the attributes (variables) that will be used in the program
+            std::string source; //The source data can be provided as a string, or from a file; which one is determined by the bool variable "isFileName"
             bool isFileName;
-
+            int num=0;
+            int firstCharNotDelimiterIndex;
+            int lastCharNotDelimiterIndex;
+            std::string LatAttributeString;
+            std::string LongAttributeString;
     };
 }
-  /*  Parse GPX data containing a route.
-   *  The source data can be provided as a string, or from a file; which one is determined by the bool parameter.
-   */
-  //std::vector<GPS::RoutePoint> parseRoute(std::string source, bool isFileName);
-
-
-  /*  Parse GPX data containing a track.
-   *  The source data can be provided as a string, or from a file; which one is determined by the bool parameter.
-   */
-  //std::vector<GPS::TrackPoint> parseTrack(std::string source, bool isFileName);
-//}
 
 #endif
