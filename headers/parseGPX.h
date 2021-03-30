@@ -21,11 +21,11 @@ namespace GPX
         private: //the attributes (variables) that will be used in the program
             std::string source; //The source data can be provided as a string, or from a file; which one is determined by the bool variable "isFileName"
             bool isFileName;
-            int num=0;
-            int firstCharNotDelimiterIndex;
-            int lastCharNotDelimiterIndex;
-            std::string LatAttributeString;
-            std::string LongAttributeString;
+            int num=0; //stores the amount of points added to the parsedResult vector
+            int firstCharNotDelimiterIndex; //stores the index of the first chatacter that is not the delimiter
+            int lastCharNotDelimiterIndex; //stores the index of the last chatacter that is not the delimiter
+            std::string LatAttributeString; //stores the latitude attribute string
+            std::string LongAttributeString; //stores the longitude attribute string
     };
 }
 

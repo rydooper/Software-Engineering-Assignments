@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE( onePoint )
     int num=0, firstCharNotDelimiterIndex=0, lastCharNotDelimiterIndex=0;
     std::string LatAttributeString = "lat", LongAttributeString = "lon";
     GPX::ParseData Parse(source, isFileName, num, firstCharNotDelimiterIndex, lastCharNotDelimiterIndex, LatAttributeString, LongAttributeString); //declaration of ParseData class constructor for use in the test -> this is used in all the tests in this file
-    std::vector<GPS::RoutePoint> routePoints = Parse.parseRoute(); //parseRoute method is called
+    std::vector<GPS::RoutePoint> routePoints = Parse.parseRoute(); //parseRoute() function is called
 
     BOOST_REQUIRE_EQUAL(routePoints.size() , 1);
 

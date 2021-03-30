@@ -10,7 +10,7 @@ using namespace GPS;
 using namespace XML;
 
 GPX::ParseData::ParseData(std::string source, bool isFileName, int num, int firstCharNotDelimiterIndex, int lastCharNotDelimiterIndex, std::string LatAttributeString, std::string LongAttributeString) { //public constructor of the ParseData class in the GPX namespace
-    this->source = source; //Lines 13-17 initialising the ParseData class attributes in the object
+    this->source = source; //Lines 13-19 initialising the ParseData class attributes in the object
     this->isFileName = isFileName;
     this->num = num;
     this->firstCharNotDelimiterIndex = firstCharNotDelimiterIndex;
@@ -51,10 +51,11 @@ bool GPX::ParseData::GetName(XML::Element element, string inputString) { //check
 }
 
 std::vector<GPS::RoutePoint> GPX::ParseData::parseRoute() { //Parses GPX data containing a route
-    int totalSubElements; //Lines 52-55 declare the variables to be used in the function
+    int totalSubElements; //Lines 54-58 declare the variables to be used in the function
     string latitude, longitude, elevation, name, lineFromFile;
     ostringstream positionsStream, fileReadStream;
     std::vector<RoutePoint> parsedResult;
+    const char Delimiter = ' ';
 
     Element element = SelfClosingElement("",{}), element1 = element, element2 = element; //Declares the element object and assigns values to the attributes
     Position startPos(0,0), prevPos = startPos, nextPos = startPos; //Declares the Position object and assigns values to the attributes
@@ -101,8 +102,8 @@ std::vector<GPS::RoutePoint> GPX::ParseData::parseRoute() { //Parses GPX data co
         if (element1.containsSubElement("name")) {
             element2 = element1.getSubElement("name");
             name = element2.getLeafContent();
-            firstCharNotDelimiterIndex = name.find_first_not_of(' ');
-            lastCharNotDelimiterIndex = name.find_last_not_of(' ');
+            firstCharNotDelimiterIndex = name.find_first_not_of(Delimiter);
+            lastCharNotDelimiterIndex = name.find_last_not_of(Delimiter);
             name = (firstCharNotDelimiterIndex == -1) ? "" : name.substr(firstCharNotDelimiterIndex,lastCharNotDelimiterIndex-firstCharNotDelimiterIndex+1);
         } else {
             name = ""; // Assigning the name variable as an empty string fixes a bug
@@ -126,9 +127,9 @@ std::vector<GPS::RoutePoint> GPX::ParseData::parseRoute() { //Parses GPX data co
             if (element1.containsSubElement("name")) {
                 element2 = element1.getSubElement("name");
                 name = element2.getLeafContent();
-                firstCharNotDelimiterIndex = name.find_first_not_of(' '); //returns the index of the first character in the name that is not a space character
-                lastCharNotDelimiterIndex = name.find_last_not_of(' '); //returns the index of the last character in the name that is not a space character
-                name = (firstCharNotDelimiterIndex == -1) ? "" : name.substr(firstCharNotDelimiterIndex,lastCharNotDelimiterIndex-firstCharNotDelimiterIndex+1); //parses the name out of the input between the space character indexes
+                firstCharNotDelimiterIndex = name.find_first_not_of(Delimiter); //returns the index of the first character in the name that is not a delimiter character
+                lastCharNotDelimiterIndex = name.find_last_not_of(Delimiter); //returns the index of the last character in the name that is not a delimiter character
+                name = (firstCharNotDelimiterIndex == -1) ? "" : name.substr(firstCharNotDelimiterIndex,lastCharNotDelimiterIndex-firstCharNotDelimiterIndex+1); //parses the name out of the input between the delimiter character indexes
             } else {
                 name = ""; // Assigning the name variable as an empty string fixes a bug
             }
@@ -146,11 +147,12 @@ std::vector<GPS::RoutePoint> GPX::ParseData::parseRoute() { //Parses GPX data co
 }
 
 std::vector<GPS::TrackPoint> GPX::ParseData::parseTrack() { //Parses GPX data containing a track
-    int total, skipped=0; //Lines 150-159 declare the variables to be used in this function
+    int total, skipped=0; //Lines 150-155 declare the variables to be used in this function
     string latitude, longitude, elevation, name, time, lineFromFile;
-    const string trksegString = "trkseg"; //constant variables of sub elements to be retrieved and counted from the element object (Lines 152-154)
+    const string trksegString = "trkseg"; //constant variables of sub elements to be retrieved and counted from the element object (Lines 152-155)
     const string trkString = "trk";
     const string trkptString = "trkpt";
+    const char Delimiter = ' ';
 
     tm timeStruct;  //struct for time
     ostringstream positionStream, fileReadStream;
@@ -207,8 +209,8 @@ std::vector<GPS::TrackPoint> GPX::ParseData::parseTrack() { //Parses GPX data co
                 element2 = element1.getSubElement("name");
                 name = element2.getLeafContent();
 
-                firstCharNotDelimiterIndex = name.find_first_not_of(' ');
-                lastCharNotDelimiterIndex = name.find_last_not_of(' ');
+                firstCharNotDelimiterIndex = name.find_first_not_of(Delimiter);
+                lastCharNotDelimiterIndex = name.find_last_not_of(Delimiter);
                 name = (firstCharNotDelimiterIndex == -1) ? "" : name.substr(firstCharNotDelimiterIndex,lastCharNotDelimiterIndex-firstCharNotDelimiterIndex+1);
             } else {
                 name = ""; // Assigning the name variable to an empty string fixes bug
@@ -223,7 +225,7 @@ std::vector<GPS::TrackPoint> GPX::ParseData::parseTrack() { //Parses GPX data co
             timeStream.str(time);
             timeStream >> std::get_time(&timeStruct,"%Y-%m-%dT%H:%M:%SZ"); //reads out time data from time stream and changes the datetime format
             if (timeStream.fail()) {
-                throw std::domain_error("Malformed date/time content: " + time);
+                throw std::domain_error("Malformed date/time content: " + time); //throws an error if the datetime data cannot be formatted correctly
             }
 
             parsedResult.back().dateTime = timeStruct; //adds the timeStruct object to the parsedResult vector
@@ -252,14 +254,14 @@ std::vector<GPS::TrackPoint> GPX::ParseData::parseTrack() { //Parses GPX data co
                 timeStream.str(time);
                 timeStream >> std::get_time(&timeStruct,"%Y-%m-%dT%H:%M:%SZ");
                 if (timeStream.fail()) {
-                    throw std::domain_error("Malformed date/time content: " + time);
+                    throw std::domain_error("Malformed date/time content: " + time); //throws an error if the datetime data cannot be formatted correctly
                 }
                 if (element1.containsSubElement("name")) {
                     element2 = element1.getSubElement("name");
                     name = element2.getLeafContent();
 
-                    firstCharNotDelimiterIndex = name.find_first_not_of(' '); //returns the index of the first instance of a space character
-                    lastCharNotDelimiterIndex = name.find_last_not_of(' '); //returns the index of the last instance of a space character
+                    firstCharNotDelimiterIndex = name.find_first_not_of(Delimiter); //returns the index of the first instance of a delimiter character
+                    lastCharNotDelimiterIndex = name.find_last_not_of(Delimiter); //returns the index of the last instance of a delimiter character
                     name = (firstCharNotDelimiterIndex == -1) ? "" : name.substr(firstCharNotDelimiterIndex,lastCharNotDelimiterIndex-firstCharNotDelimiterIndex+1); //parses the name from the delimiter indexes
                 } else {
                     name = ""; // Assigning the name variable to an empty string fixes bug
@@ -307,8 +309,8 @@ std::vector<GPS::TrackPoint> GPX::ParseData::parseTrack() { //Parses GPX data co
                         element2 = element1.getSubElement("name");
                         name = element2.getLeafContent();
 
-                        firstCharNotDelimiterIndex = name.find_first_not_of(' ');
-                        lastCharNotDelimiterIndex = name.find_last_not_of(' ');
+                        firstCharNotDelimiterIndex = name.find_first_not_of(Delimiter);
+                        lastCharNotDelimiterIndex = name.find_last_not_of(Delimiter);
                         name = (firstCharNotDelimiterIndex == -1) ? "" : name.substr(firstCharNotDelimiterIndex,lastCharNotDelimiterIndex-firstCharNotDelimiterIndex+1);
                     } else {
                         name = ""; // Assigning the name variable to an empty string fixes bug
@@ -361,8 +363,8 @@ std::vector<GPS::TrackPoint> GPX::ParseData::parseTrack() { //Parses GPX data co
                         element2 = element1.getSubElement("name");
                         name = element2.getLeafContent();
 
-                        firstCharNotDelimiterIndex = name.find_first_not_of(' ');
-                        lastCharNotDelimiterIndex = name.find_last_not_of(' ');
+                        firstCharNotDelimiterIndex = name.find_first_not_of(Delimiter);
+                        lastCharNotDelimiterIndex = name.find_last_not_of(Delimiter);
                         name = (firstCharNotDelimiterIndex == -1) ? "" : name.substr(firstCharNotDelimiterIndex,lastCharNotDelimiterIndex-firstCharNotDelimiterIndex+1);
                     } else {
                         name = ""; // Assigning the name variable to an empty string fixes bug
